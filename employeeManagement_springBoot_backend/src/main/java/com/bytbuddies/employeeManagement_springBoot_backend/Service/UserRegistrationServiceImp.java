@@ -1,12 +1,12 @@
 package com.bytbuddies.employeeManagement_springBoot_backend.Service;
 
-import java.security.Timestamp;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.bytbuddies.employeeManagement_springBoot_backend.Model.UserRegistration;
 import com.bytbuddies.employeeManagement_springBoot_backend.Repository.UserRegistrationRepository;
@@ -18,7 +18,7 @@ public class UserRegistrationServiceImp implements UserRegistrationService {
     @Autowired
     private UserRegistrationRepository urRepository;
     Logger log = LoggerFactory.getLogger(UserRegistrationService.class);
-    
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -31,38 +31,37 @@ public class UserRegistrationServiceImp implements UserRegistrationService {
      * @return added user with 201 response code.
      */
     @Override
-    public UserRegistration userRegistration(UserRegistration data) throws Exception {
+    @Transactional
+    public Boolean userRegistration(UserRegistration data) throws Exception {
         log.info("userRegistration function started!");
-        UserRegistration user = new UserRegistration();
         try {
-            Boolean userCheck = urRepository.findByEmail(data.getEmail()).isPresent();
-            if (!userCheck) {
-                if (data.getPassword().equals(data.getPassword2())) {
-                    String encodPassword = passwordEncoder.encode(data.getPassword());
-                    user.setPassword(encodPassword);
-                    user.setEmail(data.getEmail());
-                    user.setFirstName(data.getFirstName());
-                    user.setLastName(data.getLastName());
-
-                    if (data.getPhone() != null)
-                        user.setPhone(data.getPhone());
-
-                    user.setRoleId(UtilEnums.ORG_ADMIN.getValue());
-                    user.setEmailVarified(false);
-                    user.setIsFirstLogin(true);
-                    user.setCreatedAt();
-                    urRepository.save(user);
-                } else
-                    throw new Exception("Confirm password not matching with password.");
-            } else {
-                throw new Exception("Email Address Already exists.");
+            boolean userExists = urRepository.findByEmail(data.getEmail()).isPresent();
+            if (userExists) {
+                log.warn("Email already exists: {}", data.getEmail());
+                throw new IllegalArgumentException("Email Address already exists.");
             }
+            if (!data.getPassword().equals(data.getPassword2())) {
+                log.warn("Password mismatch for email: {}", data.getEmail());
+                throw new IllegalArgumentException("Confirm password does not match password.");
+            }
+            log.debug("Passwords match, proceeding to encode and save the user");
+            data.setPassword(passwordEncoder.encode(data.getPassword()));
+            data.setEmailVarified(false);
+            data.setIsFirstLogin(true);
+            data.setRoleId(UtilEnums.ORG_ADMIN.getValue());
+            data.setCreatedAt();
+            urRepository.save(data);
+            log.info("User saved successfully: {}", data.getEmail());
+            log.info("userRegistration function ended!");
+            return data.getEmailVarified();
+        } catch (DataIntegrityViolationException e) {
+            log.error("Data integrity violation occurred: ", e);
+            throw new Exception("Data integrity violation: " + e.getRootCause().getMessage(), e);
         } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new Exception(e);
+            log.error("Exception occurred during user registration: ", e);
+            throw e;
         }
-        log.info("userRegistration function ended!");
-        return user;
+
     }
 
 }

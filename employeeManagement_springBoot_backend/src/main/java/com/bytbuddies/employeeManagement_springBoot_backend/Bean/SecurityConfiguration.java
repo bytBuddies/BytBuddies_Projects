@@ -21,7 +21,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(
-                        auth -> auth.requestMatchers("v1/api/ems/user/register").permitAll().anyRequest().authenticated())
+                        auth -> auth.requestMatchers("v1/api/**").permitAll().anyRequest().authenticated())
                 .formLogin(from -> from.permitAll()).logout(logout -> logout.permitAll());
         return http.build();
     }

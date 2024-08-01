@@ -2,19 +2,23 @@ package com.bytbuddies.employeeManagement_springBoot_backend.Model;
 
 import java.sql.Timestamp;
 
+import org.springframework.data.annotation.Transient;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "user_register")
+@Valid
+@Table(name="user_register")
 public class UserRegistration {
 
     @Id
@@ -24,8 +28,8 @@ public class UserRegistration {
     @NotNull(message = "Email can't be null")
     @NotEmpty(message = "Email can't be empty")
     @NotBlank(message = "Email can't be blank")
-    @Email(message = "Not valid email")
-    @Column(name = "email", length = 25)
+    @Email(message = "Not a valid email")
+    @Column(name = "email", length = 100)
     private String email;
 
     @NotNull(message = "Password can't be null")
@@ -34,43 +38,44 @@ public class UserRegistration {
     @Column(name = "password", length = 255, nullable = false)
     private String password;
 
-    @NotNull(message = "Confrim Password cant't be null")
-    @NotEmpty(message = "Confrim Password can't be empty")
-    @NotBlank(message = "Confrim Password can't be blank")
+    @Transient
+    @NotNull(message = "Confirm Password can't be null")
+    @NotEmpty(message = "Confirm Password can't be empty")
+    @NotBlank(message = "Confirm Password can't be blank")
     private String password2;
 
-    @Column(name = "phone", length = 11)
+    @Column(name = "phone", nullable = false)
     private Long phone;
 
     @NotNull(message = "First name can't be null")
     @NotEmpty(message = "First name can't be empty")
     @NotBlank(message = "First name can't be blank")
-    @Column(name = "first_name", length = 25)
+    @Column(name = "first_name", length = 25, nullable = false)
     private String firstName;
 
     @NotNull(message = "Last name can't be null")
-    @NotEmpty(message = "Last can't be empty")
-    @NotBlank(message = "Last can't be blank")
-    @Column(name = "last_name", length = 25)
+    @NotEmpty(message = "Last name can't be empty")
+    @NotBlank(message = "Last name can't be blank")
+    @Column(name = "last_name", length = 25, nullable = false)
     private String lastName;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = true)
     private Timestamp createdAt;
 
-    @Column(name = "is_first_login")
+    @Column(name = "is_first_login", nullable = true)
     private Boolean isFirstLogin;
 
-    @Column(name = "role_id")
+    @Column(name = "role_id", nullable = true, length = 255)
     private String roleId;
 
-    @Column(name = "email_varified")
+    @Column(name = "email_varified", nullable = false)
     private Boolean emailVarified;
 
     public UserRegistration() {
     }
 
     public UserRegistration(String email, String password, Long phone, String firstName,
-            String lastName, Boolean isFirstLogin, String roleId, Boolean emaiBoolean) {
+            String lastName, Boolean isFirstLogin, String roleId, Boolean emailVarified) {
         this.email = email;
         this.password = password;
         this.phone = phone;
@@ -78,7 +83,7 @@ public class UserRegistration {
         this.lastName = lastName;
         this.isFirstLogin = isFirstLogin;
         this.roleId = roleId;
-        this.emailVarified = emaiBoolean;
+        this.emailVarified = emailVarified;
     }
 
     public String getEmail() {

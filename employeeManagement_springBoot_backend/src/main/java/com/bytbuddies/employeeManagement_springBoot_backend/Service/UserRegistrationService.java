@@ -4,6 +4,6 @@ import com.bytbuddies.employeeManagement_springBoot_backend.Model.UserRegistrati
 
 public interface UserRegistrationService {
     
-    public UserRegistration userRegistration(UserRegistration data) throws Exception;
+    public Boolean userRegistration(UserRegistration data) throws Exception;
 
 }
