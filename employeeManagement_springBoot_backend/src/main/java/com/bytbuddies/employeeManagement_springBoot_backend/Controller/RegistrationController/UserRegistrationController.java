@@ -35,21 +35,14 @@ public class UserRegistrationController {
     public ResponseEntity<HashMap<String, String>> userRegister(@RequestBody UserRegistration data) throws Exception {
         log.info("userRegister function started!");
         HashMap<String, String> response = new HashMap<>();
-        try {
-            Boolean isEmailVarified = urService.userRegistration(data);
-            if (!isEmailVarified) {
-                response.put("email", data.getEmail());
-                response.put("first_name", data.getFirstName());
-                response.put("last_name", data.getLastName());
-                response.put("email_varified", Boolean.toString(isEmailVarified));
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            response.put("error", e.getMessage());
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        } finally {
-            log.info("userRegister function ended!");
+        Boolean isEmailVarified = urService.userRegistration(data);
+        if (!isEmailVarified) {
+            response.put("email", data.getEmail());
+            response.put("first_name", data.getFirstName());
+            response.put("last_name", data.getLastName());
+            response.put("email_varified", Boolean.toString(isEmailVarified));
         }
+        log.info("userRegister function ended!");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 

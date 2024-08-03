@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.bytbuddies.employeeManagement_springBoot_backend.Model.UserRegistration;
 import com.bytbuddies.employeeManagement_springBoot_backend.Repository.UserRegistrationRepository;
 import com.bytbuddies.employeeManagement_springBoot_backend.Util.UtilEnums;
+import com.bytbuddies.employeeManagement_springBoot_backend.Util.Exceptions.CustomException;
 
 @Service
 public class UserRegistrationServiceImp implements UserRegistrationService {
@@ -38,20 +39,19 @@ public class UserRegistrationServiceImp implements UserRegistrationService {
             boolean userExists = urRepository.findByEmail(data.getEmail()).isPresent();
             if (userExists) {
                 log.warn("Email already exists: {}", data.getEmail());
-                throw new IllegalArgumentException("Email Address already exists.");
+                throw new CustomException("Email Address already exists.");
             }
             if (!data.getPassword().equals(data.getPassword2())) {
                 log.warn("Password mismatch for email: {}", data.getEmail());
-                throw new IllegalArgumentException("Confirm password does not match password.");
+                throw new CustomException("Confirm password does not match password.");
             }
-            log.debug("Passwords match, proceeding to encode and save the user");
+            // Passwords match, proceeding to encode and save the user
             data.setPassword(passwordEncoder.encode(data.getPassword()));
             data.setEmailVarified(false);
             data.setIsFirstLogin(true);
             data.setRoleId(UtilEnums.ORG_ADMIN.getValue());
             data.setCreatedAt();
             urRepository.save(data);
-            log.info("User saved successfully: {}", data.getEmail());
             log.info("userRegistration function ended!");
             return data.getEmailVarified();
         } catch (DataIntegrityViolationException e) {
